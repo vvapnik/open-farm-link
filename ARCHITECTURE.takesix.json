@@ -1,0 +1,143 @@
+{
+  "takesix": "1.0",
+  "title": "Open Farm Link spec",
+  "description": "Network protocol between a Control Panel and a farm's Head Device: client at the top, entities at the bottom",
+  "blocks": [
+    {
+      "id": "panel",
+      "at": "B1:D1",
+      "icon": "📱",
+      "title": "Control Panel",
+      "description": "App, cloud, HA or local hub",
+      "details": "The client side of OFL: it configures and monitors a Head Device but is never part of a real-time control loop (`docs/01-philosophy.md` §1.1, §1.3).\n\n- Pushes configuration: Scenarios, Grow Profile, Settings.\n- Reads Vitals and Vitals History by polling; there is no streaming channel.\n- May write raw values through Modules, at its own risk.\n- Manages many Gardens; bulk operations across them are its own concern (`docs/12-garden.md` §12.2).\n\nIntended operating modes (see `AGENTS.md`, Product context): mobile app on the LAN, proprietary cloud, Home Assistant integration, local hub."
+    },
+    {
+      "id": "binding",
+      "at": "B3:D3",
+      "icon": "🔒",
+      "title": "Local HTTPS binding",
+      "description": "REST, pairing, one connection",
+      "children": [
+        {
+          "id": "rest-api",
+          "at": "A1:C2",
+          "icon": "⇄",
+          "title": "REST API",
+          "description": "docs/16: endpoints under /garden",
+          "details": "Source: `docs/16-rest-api.md`\n\n- HTTPS on port 443, JSON bodies, paths rooted at `/garden` (one Garden per device).\n- Collections return summaries; sub-resources are fetched one by one to keep responses small.\n- Plants are never created or deleted via the API: they appear when the hardware detects an anchor module.\n- Errors: `{ \"error\": \"…\" }` with 400/401/403/404/405/409/422/429.\n- **One connection at a time**; a second one is refused at TCP level, an idle one is closed after 5 s.\n- Time: `GET`/`PUT /garden/time` (§16.6)."
+        },
+        {
+          "id": "discovery",
+          "at": "D1:F2",
+          "icon": "📡",
+          "title": "Discovery",
+          "description": "§16.4: mDNS _ofl._tcp, ofl-peerN",
+          "details": "Source: `docs/16-rest-api.md` §16.4\n\n- mDNS service `_ofl._tcp.local.` on port 443.\n- TXT record: `garden_id`, plus `pair=button` / `pair=code` while pairing is open.\n- Hostname `ofl-peer{N}.local`: the first free N on startup. N is not an identity; `garden_id` is.\n- TXT data is unauthenticated: a paired device is recognised by its pinned key fingerprint."
+        },
+        {
+          "id": "security",
+          "at": "A4:F5",
+          "icon": "🔑",
+          "title": "Security",
+          "description": "docs/22: device key, pairing, tokens and login/password, factory reset",
+          "details": "Source: `docs/22-security.md` (rationale in `AGENTS.md`, Security design notes)\n\n- **No unauthenticated access**, no switch to disable it (§22.1).\n- Device identity: a self-signed key pinned by the client; `garden_id` derives from it (§22.2).\n- **Pairing:** a mandatory button window, or an optional 80-bit setup code with a challenge step (§22.3–22.4).\n- **Credentials:** bearer tokens or login/password over HTTP Basic, all with full access (§22.5–22.6).\n- Factory reset regenerates the key, so the device becomes a new Garden (§22.8)."
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "at": "B5:D6",
+      "icon": "🌳",
+      "title": "Entity model",
+      "description": "Garden of Plants, a System and Scenarios; transport-independent",
+      "children": [
+        {
+          "id": "garden",
+          "at": "A1:C2",
+          "icon": "🏡",
+          "title": "Garden",
+          "description": "docs/12, 21: one per Head Device",
+          "details": "Sources: `docs/12-garden.md`, `docs/21-system-fields.md`, overview in `docs/02-entities-overview.md`\n\n- Top-level entity, one per Head Device: `garden_id`, `name`, `description`, `protocol_version`, `status`, `type`.\n- Holds `plants` (unordered), one `system`, `preferences`, `scenarios`, `engine_capabilities`.\n- Its effective capabilities are `system.capabilities ∪ engine_capabilities`."
+        },
+        {
+          "id": "plant",
+          "at": "D1:F2",
+          "icon": "🪴",
+          "title": "Plant",
+          "description": "docs/03: anchor module + its group",
+          "children": [
+            {
+              "id": "plant-identity",
+              "at": "A1:C2",
+              "icon": "🏷",
+              "title": "Identity",
+              "description": "docs/03: plant_id, name, grouping",
+              "details": "Source: `docs/03-plant.md`\n\n- `plant_id` (assigned by the Head Device), `name`, `description`, `status`.\n- A Plant is the unit of control: the group of modules the Head Device assigned to one `plant_id`, exactly one of them the **anchor** (pot/slot), the rest non-anchor (light, valve…).\n- How the device forms the group is outside OFL (§1.7)."
+            },
+            {
+              "id": "plant-readings",
+              "at": "D1:F2",
+              "icon": "📈",
+              "title": "Readings",
+              "description": "docs/04, 05: vitals and history",
+              "details": "Sources: `docs/04-vitals.md`, `docs/05-vitals-history.md`\n\n- **Vitals:** current normalized readings, keyed by the Capability Catalog.\n- **Vitals History:** append-only time series; `interval` is stored per record."
+            },
+            {
+              "id": "plant-config",
+              "at": "A4:C5",
+              "icon": "🎛",
+              "title": "Configuration",
+              "description": "docs/06–08: calibration, settings, grow profile",
+              "details": "Sources: `docs/06-hardware-calibration.md`, `docs/07-settings.md`, `docs/08-grow-profile.md`\n\n- **Hardware Calibration:** per hardware model (`blueprint_id` + `endpoint_type`), refreshed from the library, not user-owned.\n- **Settings:** per installed module (`module_id`), seeded from the library, then user-owned.\n- **Grow Profile:** targets for the plant's species, imported and editable; independent of the two above."
+            },
+            {
+              "id": "plant-control",
+              "at": "D4:F5",
+              "icon": "🔧",
+              "title": "Control",
+              "description": "docs/09, 14, 17: modules, capabilities, actuators",
+              "details": "Sources: `docs/09-modules.md`, `docs/14-capabilities.md`, `docs/17-actuators.md`\n\n- **Modules:** raw list of the group's physical modules and endpoints; the only place hardware detail surfaces. Raw writes, at the caller's risk.\n- **Capabilities:** derived binary flags (what this Plant can do); gate Scenarios, Grow Profiles and Culture Packs (`422 missing_capabilities`).\n- **Actuators:** normalized read/write state of every controllable capability; Scenarios act through it."
+            }
+          ]
+        },
+        {
+          "id": "system",
+          "at": "A4:C5",
+          "icon": "💧",
+          "title": "System",
+          "description": "docs/10: shared modules, e.g. water tank",
+          "details": "Source: `docs/10-system.md`\n\n- Modules not tied to any Plant: water tank, mains pump. Exactly one System per Garden, no id.\n- Same composition as Plant (vitals, history, calibration, settings, modules, capabilities, actuators) **minus Grow Profile**: there is no species to target.\n- Driven by Scenarios that read across Plants (\"if any Plant wants water, run the pump\")."
+        },
+        {
+          "id": "automation",
+          "at": "D4:F5",
+          "icon": "⚙",
+          "title": "Automation",
+          "description": "docs/11, 13, 15: scenarios, preferences, packs",
+          "details": "Sources: `docs/11-scenarios.md`, `docs/13-preferences.md`, `docs/15-culture-pack.md`\n\n- **Scenarios** run on the Head Device without the Control Panel. They read Vitals, Grow Profile, Settings and Preferences and write through Actuators, never Modules.\n- Kinds: `generic` (one firmware template per category), `specialized` (bound to one target), `script` (reserved, gated by an `engine.*` capability).\n- **Preferences:** garden-wide limits for Scenarios: quiet hours, brightness cap, vacation mode.\n- **Culture Pack:** a Grow Profile plus specialized Scenarios, imported together from a library."
+        }
+      ]
+    },
+    {
+      "id": "principles",
+      "at": "E1:F1",
+      "icon": "🧭",
+      "title": "Principles",
+      "description": "docs/01",
+      "details": "Source: `docs/01-philosophy.md`\n\n- **§1.1 Pure push:** the Control Panel decides; the Head Device executes.\n- **§1.2 Transport is separate:** v0.1 defines only the local HTTPS binding; the entity model must carry over to future (e.g. cloud) bindings unchanged. Stateless, one request at a time.\n- **§1.3 Autonomy:** watering, light and climate run on the device with no Control Panel.\n- **§1.4 Desired state,** not one-off actions (except raw Modules).\n- **§1.5 Zero-config:** stack the rack, scan the kit, defaults come from a library.\n- **§1.6 Resources:** must fit a plain ESP32, ideally ESP32-C3.\n- **§1.7 Backend-agnostic:** no bus or register concepts outside Modules.\n- **§1.8 No unauthenticated access.**"
+    },
+    {
+      "id": "dictionaries",
+      "at": "F5:F6",
+      "icon": "📖",
+      "title": "Dictionaries",
+      "description": "docs/18–21",
+      "details": "Standard catalogs shared by the entities (overview in `docs/02-entities-overview.md` §2.7):\n\n- `docs/18-module-classes.md` — module `class` values (raw layer)\n- `docs/19-endpoint-types.md` — endpoint `type`/`format` values (raw layer)\n- `docs/20-capability-catalog.md` — keys for Vitals, Actuators and Capabilities; `engine.*` namespace\n- `docs/21-system-fields.md` — `status` and `protocol_version` on Garden and Plant\n\nEach has an open vendor range."
+    }
+  ],
+  "links": [
+    { "from": "panel", "to": "binding", "label": "HTTPS" },
+    { "from": "binding", "to": "model", "label": "JSON" },
+    { "from": "model", "to": "dictionaries", "label": "keys", "style": "dashed" }
+  ]
+}

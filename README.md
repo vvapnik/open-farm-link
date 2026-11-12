@@ -45,6 +45,10 @@ to the structures it's composed of, it doesn't inline them.
 | 21 | [System Fields](docs/21-system-fields.md) | Standard `status`/`protocol_version` fields on Garden and Plant |
 | 22 | [Security](docs/22-security.md) | Device identity, HTTPS, pairing, token and login/password auth, factory reset |
 
+A zoomable map of the spec is in
+[`ARCHITECTURE.takesix.json`](ARCHITECTURE.takesix.json) (a TakeSix
+diagram).
+
 ## Contributing
 
 The protocol is pre-1.0 and WIP — no ADRs or changelog discipline yet.

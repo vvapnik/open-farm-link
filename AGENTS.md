@@ -2,6 +2,13 @@
 
 Guidance for AI agents working in this repo.
 
+Project map: `ARCHITECTURE.takesix.json` — read it first. It shows the
+spec's layers (Control Panel, local HTTPS binding, entity model,
+dictionaries) and which `docs/*.md` file holds each part. When a doc is
+added, renamed or split, update the map so its paths still match `docs/`.
+
+This project is developed with the help of Claude Code (Anthropic).
+
 ## What this is
 
 Open Farm Link (OFL) — a network protocol connecting a farm's Head Device
