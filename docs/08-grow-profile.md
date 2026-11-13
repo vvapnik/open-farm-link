@@ -38,13 +38,15 @@ Profile's.
 | `<category>_enabled` | `bool` | One flag per generic Scenario category (`watering_enabled`, `lighting_enabled`, `climate_enabled`, ...) — see §8.3. |
 | `targets.moisture_percent` | `{ min, max }` | Target soil moisture range, in the [Capability Catalog](20-capability-catalog.md)'s `moisture` unit (percent). |
 | `targets.light_lux` | `number` (lux) | Target illuminance, [Capability Catalog](20-capability-catalog.md) `dimmer`/`light` unit. |
-| `targets.light_hours_per_day` | `number` | Target daily light duration. |
+| `targets.light_hours_per_day` | `number` | Target daily light duration. The light window opens at the end of quiet hours and lasts this long, cut short by the next quiet hours — see the generic `lighting` template, [Scenarios §11.2](11-scenarios.md#112-generic-scenarios). |
 | `sensor_calibration.<key>` | `{ offset }` (or similar, TBD) | Per-substrate correction applied on top of a [Capability Catalog](20-capability-catalog.md) reading — see §8.5. Open for more keys/shape as needed. |
 | `required_capabilities` | array of [Capability Catalog](20-capability-catalog.md) keys | Checked at add-time — see [Capabilities §14.4](14-capabilities.md#144-validation-lifecycle). |
 
 ## 8.3 `*_enabled` flags
 
-One per generic Scenario category, not a single master switch — turning
+Always present on a Plant's Grow Profile — a submitted profile that omits
+one keeps that automation on (`true`). One per generic Scenario category,
+not a single master switch — turning
 off `watering_enabled` must not also silence `lighting_enabled`. Each is
 read as an ordinary condition clause by that category's generic Scenario
 template ([Scenarios §11.2](11-scenarios.md#112-generic-scenarios)); there

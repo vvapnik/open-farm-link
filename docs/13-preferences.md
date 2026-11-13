@@ -19,7 +19,8 @@ unconstrained by design (§9.3).
 {
   "quiet_hours": { "from": "22:00", "to": "07:00" },
   "max_brightness": 80,
-  "vacation_mode": false
+  "vacation_mode": false,
+  "timezone": "CET-1CEST,M3.5.0,M10.5.0/3"
 }
 ```
 
@@ -28,5 +29,6 @@ unconstrained by design (§9.3).
 | `quiet_hours` | `{ from, to }` (`"HH:MM"`, 24h, Head Device local time) or `null` | Window during which noisy/disruptive actuators (pumps, fans) should not run. Read by the generic `watering` Scenario template as `garden.preferences.quiet_hours` (see [Scenarios §11.2](11-scenarios.md#112-generic-scenarios)). `null`/absent means no quiet hours set. Doesn't (yet) handle a window crossing midnight the other way — assume `from` < `to` within one day, or `from` > `to` meaning the window wraps past midnight (e.g. `22:00`–`07:00` above); exact comparison semantics for Scenario clause evaluation aren't spelled out further here. |
 | `max_brightness` | `number` (percent, 0–100) or `null` | Ceiling applied across every light module in the Garden, regardless of what an individual Plant's Grow Profile asks for. `null`/absent means no cap. Not yet wired into the generic `lighting` Scenario template's condition/action — flagged here, not resolved. |
 | `vacation_mode` | `boolean` | Default `false`. Alters normal automation behavior garden-wide while the user is away — exact effect on Scenario evaluation not yet defined. |
+| `timezone` | `string` (POSIX TZ rule, e.g. `"CET-1CEST,M3.5.0,M10.5.0/3"`) or `null` | The Head Device's local time zone, for `quiet_hours` and any other "Head Device local time" field. `null` means UTC. A POSIX rule rather than an IANA name so a constrained device needs no time-zone database; a Control Panel converts its own zone. |
 
 Extensible: more fields can be added later without breaking this shape.

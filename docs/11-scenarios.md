@@ -56,6 +56,28 @@ substituting that target's own field values.
 }
 ```
 
+The generic `lighting` template (`applies_to: "plant"`,
+`required_capabilities: ["dimmer"]`) needs a time window rather than a
+threshold, so it is defined by behavior:
+
+- The window **opens** at the end of quiet hours
+  (`garden.preferences.quiet_hours.to`) and **closes** when quiet hours
+  begin or `grow_profile.targets.light_hours_per_day` hours after it
+  opened, whichever comes first. Without quiet hours there is no opening
+  time and the template does nothing.
+- On entering the window — including a Head Device starting up inside it,
+  or the light module re-appearing — it sets `dimmer` to
+  `grow_profile.targets.light_lux`, capped by
+  `garden.preferences.max_brightness`. On leaving it, it sets `dimmer` to
+  0.
+- Condition: `grow_profile.lighting_enabled`. Turning it off inside the
+  window leaves the light as it is (§11.5); turning it back on inside the
+  window sets `light_lux` again.
+- A manual change of the Plant's light — an Actuators write to `dimmer`
+  or a raw Modules write to its endpoint — sets
+  `grow_profile.lighting_enabled` to `false`, so automation never undoes
+  what a person just did. The Control Panel turns it back on.
+
 The enable/disable switch for a generic scenario is not a separate
 mechanism — it's just `grow_profile.watering_enabled` (or the equivalent
 field for another category) evaluated as an ordinary clause. See §11.5 for
