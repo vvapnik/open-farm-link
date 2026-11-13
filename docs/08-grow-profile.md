@@ -37,7 +37,7 @@ Profile's.
 | `species` | `string` | Free-form species identifier, also the library import key (§8.4). |
 | `<category>_enabled` | `bool` | One flag per generic Scenario category (`watering_enabled`, `lighting_enabled`, `climate_enabled`, ...) — see §8.3. |
 | `targets.moisture_percent` | `{ min, max }` | Target soil moisture range, in the [Capability Catalog](20-capability-catalog.md)'s `moisture` unit (percent). |
-| `targets.light_flux` (shown above as `light_lux`) | `number` (lux) | Target illuminance, [Capability Catalog](20-capability-catalog.md) `dimmer`/`light` unit. |
+| `targets.light_lux` | `number` (lux) | Target illuminance, [Capability Catalog](20-capability-catalog.md) `dimmer`/`light` unit. |
 | `targets.light_hours_per_day` | `number` | Target daily light duration. |
 | `sensor_calibration.<key>` | `{ offset }` (or similar, TBD) | Per-substrate correction applied on top of a [Capability Catalog](20-capability-catalog.md) reading — see §8.5. Open for more keys/shape as needed. |
 | `required_capabilities` | array of [Capability Catalog](20-capability-catalog.md) keys | Checked at add-time — see [Capabilities §14.4](14-capabilities.md#144-validation-lifecycle). |

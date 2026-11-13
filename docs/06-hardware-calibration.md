@@ -10,7 +10,9 @@ physical units without knowing which specific module is installed.
 Raw sensor/actuator physical calibration (e.g. a moisture sensor's
 dry/wet reference points) is **not** part of this structure — that
 calibration happens inside the Head Device's own module-level
-implementation. A module's endpoint values, as OFL sees them, are already
+implementation, using points kept in that module's
+[Settings](07-settings.md#73-standard-fields) (`moisture_dry_raw` /
+`moisture_wet_raw`). A module's endpoint values, as OFL sees them, are already
 in a standardized range (e.g. 0–100%). OFL never sees, and does not need,
 a module's raw sensor values.
 

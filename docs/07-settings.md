@@ -63,7 +63,16 @@ to reconcile.
 
 | Field | Type | Description |
 |---|---|---|
-| `mount_height_mm` | `uint32` | Distance between a light module and the pot. The only standard field so far — open to extension as more installation-geometry cases come up. |
+| `mount_height_mm` | `uint32` | Distance between a light module and the pot. Open to extension as more installation-geometry cases come up. |
+| `moisture_dry_raw` | `uint16` | On a module whose `moisture` endpoint reports a raw reading: that reading with the dry pot in air — maps to 0 %. See [Hardware Calibration §6.1](06-hardware-calibration.md#61-what-this-is-not). |
+| `moisture_wet_raw` | `uint16` | The same reading with the sensor in water — maps to 100 %. Must differ from `moisture_dry_raw`. |
+
+`moisture_dry_raw`/`moisture_wet_raw` belong here rather than in Hardware
+Calibration because they depend on the installed sensor and pot wall, and a
+user re-measures them in place. Their defaults (§7.2) are typical points for
+the sensor model, so an uncalibrated pot still reads approximately; a
+production batch can be calibrated once on a reference pot and the same
+pair written to every pot of the batch.
 
 ## 7.4 Relationship to the zero-configuration principle
 
