@@ -43,6 +43,15 @@ different hardware unchanged.
 - `value` — current commanded state, in real physical units (see §17.3),
   never the module's raw standardized command range.
 - `unit` — explicit, same convention as [Vitals](04-vitals.md#42-format).
+- `min`, `max` — optional: the range a write can actually reach, in `unit`
+  (e.g. the measured range of a light's `dimmer_lux_curve`,
+  [Settings §7.3](07-settings.md#73-standard-fields)). A client bounds its
+  controls by them; a write outside is clamped.
+
+A Head Device that cannot yet convert a capability to its physical unit
+(e.g. a light with no measured curve) reports the module's own normalized
+range honestly — `"unit": "percent"` with `min: 0, max: 100` — rather than
+labelling it with the catalog's physical unit.
 
 An entry is only present if that capability is currently available for
 the Plant/System (same presence rule as Vitals — see

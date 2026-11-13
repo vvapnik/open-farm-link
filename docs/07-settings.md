@@ -66,10 +66,11 @@ to reconcile.
 | `mount_height_mm` | `uint32` | Distance between a light module and the pot. Open to extension as more installation-geometry cases come up. |
 | `moisture_dry_raw` | `uint16` | On a module whose `moisture` endpoint reports a raw reading: that reading with the dry pot in air — maps to 0 %. See [Hardware Calibration §6.1](06-hardware-calibration.md#61-what-this-is-not). |
 | `moisture_wet_raw` | `uint16` | The same reading with the sensor in water — maps to 100 %. Must differ from `moisture_dry_raw`. |
+| `dimmer_lux_curve` | array of `{ command, lux }`, up to 8 | On a light module: illuminance measured with a lux meter at the plant for given commands (`command` in the module's 0–100 % range). Sorted by `command`; `lux` must rise strictly with it. With two or more points the Head Device reports and accepts the `dimmer` actuator in lux, piecewise-linear and clamped to the measured range ([Actuators §17.2](17-actuators.md#172-format)). |
 
-`moisture_dry_raw`/`moisture_wet_raw` belong here rather than in Hardware
-Calibration because they depend on the installed sensor and pot wall, and a
-user re-measures them in place. Their defaults (§7.2) are typical points for
+`moisture_dry_raw`/`moisture_wet_raw` and `dimmer_lux_curve` belong here
+rather than in Hardware Calibration because they depend on the installed sensor and pot wall
+(or the light's mount height), and a user re-measures them in place. Their defaults (§7.2) are typical points for
 the sensor model, so an uncalibrated pot still reads approximately; a
 production batch can be calibrated once on a reference pot and the same
 pair written to every pot of the batch.
